@@ -107,6 +107,12 @@ public class BottonRegresar : MonoBehaviour
             Disconnect();
         }
     }
+    public void SendbyButton(string message)
+    {
+        Debug.Log("Hola");
+        SendMessageToESP32("Hola, estoy mandando algo");
+
+    }
 
     void OnApplicationQuit()
     {
