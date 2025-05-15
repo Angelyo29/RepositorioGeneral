@@ -1,1 +1,10 @@
-ECHO est  activado.
+
+*.fbx
+*.obj
+*.meta
+*.cs
+Demas/
+Elements/
+Scenes/
+TextMesh Pro/
+UIRangeSlider/
