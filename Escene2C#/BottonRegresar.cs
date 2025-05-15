@@ -6,8 +6,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Net;
 using System;
-//Hola
-//hi
+using System.Threading.Tasks;
+
 public class BottonRegresar : MonoBehaviour
 {
     [Header("Configuración de Conexión")]
@@ -40,23 +40,64 @@ public class BottonRegresar : MonoBehaviour
     }
 
     // EscenaSiguiente
-    public void LoadNextScene()
+    public async void LoadNextScene()
     {
-        ConnectToESP32();
+        await ConnectToESP32Async();
         SendMessageToESP32("Hola desde Unity!");
 
-        int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
-        if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
+        if (isConnected)
         {
-            SceneManager.LoadScene(nextSceneIndex);
+            int nextSceneIndex = SceneManager.GetActiveScene().buildIndex + 1;
+            if (nextSceneIndex < SceneManager.sceneCountInBuildSettings)
+            {
+                SceneManager.LoadScene(nextSceneIndex);
+            }
+            else
+            {
+                Debug.LogWarning("No hay más escenas disponibles. Volviendo a la escena 0.");
+                SceneManager.LoadScene(0);
+            }
         }
         else
         {
-            Debug.LogWarning("No hay más escenas disponibles. Volviendo a la escena 0.");
-            SceneManager.LoadScene(0);
+            Debug.LogWarning("No se pudo conectar a la ESP32.");
         }
     }
 
+    public async Task ConnectToESP32Async()
+    {
+        if (isConnected) return;
+
+        Debug.Log("Intentando conectar a ESP32...");
+        client = new TcpClient();
+
+        try
+        {
+            var connectTask = client.ConnectAsync(IPAddress.Parse(ipAddress), port);
+            var timeoutTask = Task.Delay(3000); // Timeout de 3 segundos
+
+            var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+
+            if (completedTask == connectTask && client.Connected)
+            {
+                stream = client.GetStream();
+                isConnected = true;
+                status = "Connected to ESP32";
+                Debug.Log(status);
+            }
+            else
+            {
+                status = "Conexión a ESP32 fallida o tiempo de espera agotado.";
+                Debug.LogWarning(status);
+                client.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            status = "Error: " + e.Message;
+            Debug.LogError(status);
+        }
+    }
     public void ConnectToESP32()
     {
         if (isConnected) return;
@@ -80,19 +121,13 @@ public class BottonRegresar : MonoBehaviour
             status = "Error: " + e.Message;
         }
     }
-
     public void SendMessageToESP32(string message)
     {
         if (!isConnected)
         {
-            Debug.LogWarning("No conectado al servidor. Intentando reconectar...");
+            Debug.LogWarning("No conectado al servidor.");
             ConnectToESP32();
-
-            if (!isConnected)
-            {
-                Debug.LogWarning("No se pudo establecer conexión para enviar el mensaje.");
-                return;
-            }
+            return;
         }
 
         try
@@ -107,11 +142,11 @@ public class BottonRegresar : MonoBehaviour
             Disconnect();
         }
     }
+
     public void SendbyButton(string message)
     {
         Debug.Log("Hola");
         SendMessageToESP32("Hola, estoy mandando algo");
-
     }
 
     void OnApplicationQuit()
