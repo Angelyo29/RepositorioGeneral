@@ -2,7 +2,7 @@
 *.fbx
 *.obj
 *.meta
-*.cs
+
 Demas/
 Elements/
 Scenes/
