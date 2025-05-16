@@ -37,12 +37,12 @@ public class ButtonMatrix : MonoBehaviour
             case 0:
                 ButtonAxis.image.color = color1;
                 //animator.SetTrigger("FirstSelect");
-                Debug.Log("Activando color rojo y animación FirstSelect");
+                Debug.Log("Activando color rojo y animaciï¿½n FirstSelect");
                 break;
             case 1:
                 ButtonAxis.image.color = color2;
                 //animator.SetTrigger("SecondSelect");
-                Debug.Log("Activando color verde y animación SecondSelect");
+                Debug.Log("Activando color verde y animaciï¿½n SecondSelect");
 
 
                 float a1_val = 71.63f;
@@ -60,7 +60,7 @@ public class ButtonMatrix : MonoBehaviour
             case 2:
                 ButtonAxis.image.color = color3;
                 animator.SetTrigger("Reset");
-                Debug.Log("Activando color azul y animación Reset");
+                Debug.Log("Activando color azul y animaciï¿½n Reset");
                 panel.SetActive(false);
                 n = -1;
                 break;
@@ -114,15 +114,15 @@ public class ButtonMatrix : MonoBehaviour
         row1 = row1.TrimEnd('0').TrimEnd('.');
         row2 = row2.TrimEnd('0').TrimEnd('.');
 
-        // La última fila siempre es fija [0,0,0,1]
-        return $"Matriz de Transformación DH:\n{row0}\n{row1}\n{row2}\n0 0 0 1";
+        // La ï¿½ltima fila siempre es fija [0,0,0,1]
+        return $"Matriz de Transformaciï¿½n DH:\n{row0}\n{row1}\n{row2}\n0 0 0 1";
     }
-    // Función auxiliar para redondear toda la matriz
+    // Funciï¿½n auxiliar para redondear toda la matriz
     Matrix4x4 TruncateMatrix(Matrix4x4 matrix, int decimalPlaces)
     {
         float multiplier = Mathf.Pow(10f, decimalPlaces);
 
-        // Truncamiento matemático
+        // Truncamiento matemï¿½tico
         matrix.m00 = Mathf.Floor(matrix.m00 * multiplier) / multiplier;
         matrix.m01 = Mathf.Floor(matrix.m01 * multiplier) / multiplier;
         matrix.m02 = Mathf.Floor(matrix.m02 * multiplier) / multiplier;
@@ -142,7 +142,7 @@ public class ButtonMatrix : MonoBehaviour
         // (Opcional: Solo si necesitas garantizar formato limpio en los floats)
         matrix.m00 = float.Parse(matrix.m00.ToString("0.########"));
         matrix.m01 = float.Parse(matrix.m01.ToString("0.########"));
-        // ... Repetir para los demás elementos si es estrictamente necesario
+        // ... Repetir para los demï¿½s elementos si es estrictamente necesario
 
         return matrix;
     }
@@ -150,7 +150,7 @@ public class ButtonMatrix : MonoBehaviour
 
     private void LogMatrix(Matrix4x4 matrix)
     {
-        string matrixString = "Matriz de Transformación de Denavit-Hartenberg:\n";
+        string matrixString = "Matriz de Transformaciï¿½n de Denavit-Hartenberg:\n";
         for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < 4; j++)
@@ -177,11 +177,11 @@ public class ButtonMatrix : MonoBehaviour
                 int index = row * 4 + col;
                 if (cellTexts[index] != null)
                 {
-                    // Formatear a 2 decimales y alinear números
+                    // Formatear a 2 decimales y alinear nï¿½meros
                     float value = matrix[row, col];
                     string formattedValue;
 
-                    // Formato especial para números enteros o con decimales .00
+                    // Formato especial para nï¿½meros enteros o con decimales .00
                     if (Mathf.Approximately(value, Mathf.Round(value)))
                     {
                         formattedValue = value.ToString("F0").PadLeft(6);

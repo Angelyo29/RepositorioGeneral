@@ -1,4 +1,4 @@
-from machine import Timer, Pin
+from machine import Timer, Pin, PWM
 import network
 import socket
 import time
@@ -16,8 +16,28 @@ class ESP32Server:
         self.client_conn = None
         self.client_addr = None
         self.led = Pin(2, Pin.OUT)  # LED integrado para indicar estado
-        self.last_activity = tim
-        e.time()
+        self.last_activity = time.time()
+        
+        # Configuración de pines para LED RGB (ajusta según tu ESP32-S3)
+        # Estos son ejemplos - verifica los pines correctos para tu placa
+        self.led_red = PWM(Pin(41))   # Pin para LED Rojo
+        self.led_green = PWM(Pin(40)) # Pin para LED Verde
+        self.led_blue = PWM(Pin(39))  # Pin para LED Azul
+        
+        # Configurar frecuencia PWM
+        self.led_red.freq(1000)
+        self.led_green.freq(1000)
+        self.led_blue.freq(1000)
+        
+        # Apagar todos los LEDs al inicio
+        self.set_rgb_color(0, 0, 0)
+
+    def set_rgb_color(self, red, green, blue):
+        """Establece el color del LED RGB (valores de 0 a 255)"""
+        # Convertir de 0-255 a 0-65535 (rango PWM)
+        self.led_red.duty_u16(int(red * 257))
+        self.led_green.duty_u16(int(green * 257))
+        self.led_blue.duty_u16(int(blue * 257))
 
     def setup_ap(self):
         """Configura el Access Point"""
@@ -58,41 +78,36 @@ class ESP32Server:
                         print("Cliente cerró la conexión")
                         break
                         
-                    message = data.decode().strip()
+                    message = data.decode().strip().lower()  # Convertir a minúsculas
                     print(f"Mensaje recibido: {message}")
+                    
+                    # Procesar el mensaje y controlar LED RGB
+                    if message == "hola":
+                        print("Mostrando color azul")
+                        self.set_rgb_color(0, 0, 255)  # Azul
+                    elif message == "adios":
+                        print("Mostrando color rojo")
+                        self.set_rgb_color(255, 0, 0)    # Rojo
+                    else:
+                        print("Mensaje diferente recibido")
+                        self.set_rgb_color(0, 255, 0)    # Verde para otros mensajes
                     
                     # Enviar respuesta de confirmación
                     try:
                         self.client_conn.send(f"ACK: {message}\n".encode())
                     except OSError as e:
                         print(f"Error al enviar confirmación: {e}")
-                        # No rompemos la conexión, intentamos mantenerla
                         continue
-                    
-                    # Procesar el mensaje (aquí puedes añadir la lógica según el mensaje recibido)
-                    # Por ejemplo: controlar LEDs, relés, etc.
-                    
-                    # Ejemplo: si recibimos "led:on", encendemos un LED específico
-                    if message.startswith("led:"):
-                        led_command = message.split(":", 1)[1].lower()
-                        if led_command == "on":
-                            print("Encendiendo LED")
-                            self.led.on()
-                        elif led_command == "off":
-                            print("Apagando LED")
-                            self.led.off()
                     
                 except OSError as e:
                     if e.args[0] == uerrno.ETIMEDOUT:
                         continue  # Timeout, seguir esperando
                     elif e.args[0] == uerrno.ECONNRESET:
                         print("Conexión reiniciada por el cliente (ECONNRESET)")
-                        # Intentamos mantener la conexión esperando una reconexión
                         print("Esperando reconexión...")
                         break
                     else:
                         print(f"Error en la conexión: {e}")
-                        # Intentamos mantener el servidor en ejecución
                         break
                     
                 # Verificar timeout de inactividad
@@ -113,6 +128,7 @@ class ESP32Server:
             self.client_conn = None
             self.client_addr = None
             self.led.off()  # LED apagado cuando no hay conexión
+            self.set_rgb_color(0, 0, 0)  # Apagar LED RGB
             print("Conexión con cliente cerrada")
 
     def close_server(self):
@@ -158,4 +174,3 @@ if __name__ == "__main__":
     )
     
     server.run()
-#Mod

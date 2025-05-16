@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections;
 using System;
-//-0.009
+
 public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     // Referencias a los transformes de los joints
@@ -22,11 +22,13 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public Slider sliderVerificator;
 
 
-    private int[] counterVector = new int[] { 0, 0, 0, 0, 0,0,0 };
+    public int[] counterVector = new int[] { 0, 0, 0, 0, 0,0,0 };
     private bool isIncreasePressed = false;
     private bool isDecreasePressed = false;
     //private bool isOpen = false;
     private float holdDelay = 0.3f;
+
+    int ObjValue;
 
     void Start()
     {
@@ -64,16 +66,40 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         //Debug.Log("El angulo es");
         //Debug.Log(angleRotation);
-        if (angleRotationLocal >= 90)
+
+        if (ObjValue == 3)
         {
-            angleRotationLocal = 90;
+            if (angleRotationLocal >= 50)
+            {
+                angleRotationLocal = 50;
+                counterVector[ObjValue] = 50;
+
+            }
+            else if (angleRotationLocal <= -50)
+            {
+                angleRotationLocal = -50;
+                counterVector[ObjValue] = -50;
+
+            }
 
         }
-        else if(angleRotationLocal <= -90)
+        else
         {
-            angleRotationLocal = -90;
+            if (angleRotationLocal >= 90)
+            {
+                angleRotationLocal = 90;
+                counterVector[ObjValue] = 90;
+
+            }
+            else if (angleRotationLocal <= -90)
+            {
+                angleRotationLocal = -90;
+                counterVector[ObjValue] = -90;
+
+            }
 
         }
+
 
 
         switch (ObjValueLocal)
@@ -164,7 +190,7 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     void IncreaseCounter()
     {
 
-        int ObjValue = (int)GetSliderValue();
+        ObjValue = (int)GetSliderValue();
         counterVector[ObjValue] = counterVector[ObjValue] + 5; // Cambia el valor del tercer elemento a 10
         int angleRotation = counterVector[ObjValue];
         counterVector[ObjValue]=rotationObj(angleRotation,ObjValue);
