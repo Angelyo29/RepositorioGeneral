@@ -68,6 +68,8 @@ def main():
         while True:
             move_servo(1, 30)  # Servo 1 a 30°
             time.sleep(1)
+            move_servo(1, 0 )  # Servo 1 a 30°
+            time.sleep(1)
             
             move_servo(2, 45)  # Servo 2 a 45°
             time.sleep(2)

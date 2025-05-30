@@ -14,59 +14,78 @@ public class ButtonMatrix : MonoBehaviour
     [SerializeField] private Slider sliderVerificator;
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text[] cellTexts;
-    //[SerializeField] private TextMeshProUGUI sliderText = null;
+    [SerializeField] private TextMeshProUGUI textTitleMatrix = null;
 
     private int n = 0;
+    bool panelState = false;
+    string axisUsed;
 
     void Start()
     {
+        ButtonAxis.image.color = color1;
         ButtonAxis.onClick.AddListener(ChangeState);
         if (animator == null)
             animator = GetComponent<Animator>();
         if (ButtonAxis == null)
             ButtonAxis = GetComponent<Button>();
+        panel.SetActive(panelState);
     }
 
-
-    //jose
+    public void ChangeMatrixUpdate()
+    {
+        if (!panelState) return; // Solo actuar si el panel está visible
+        // Si el botón está en BLANCO (n=0), mostrar matriz del efector final
+        if (ButtonAxis.image.color == color3) // color3 = blanco
+        {
+            ActualizaMatriz(0);
+            textTitleMatrix.text = "Matriz de transformación del efector final";
+        }
+        // Si el botón está en VERDE (n=1), mostrar matriz del eje seleccionado
+        else
+        {
+            ActualizaMatriz((int) sliderVerificator.value);
+            //Debug.Log("Hola");
+            //Debug.Log((int)sliderVerificator.value);
+            //Debug.Log("Angle 1");
+            //Debug.Log(ButtonScr.counterVector[1]);
+            //Debug.Log("Angle 2");
+            //Debug.Log(ButtonScr.counterVector[2]);
+            //Debug.Log("Angle 3");
+            //Debug.Log(ButtonScr.counterVector[3]);
+            //Debug.Log("Angle 4");
+            //Debug.Log(ButtonScr.counterVector[4]);
+            //Debug.Log("Angle 5");
+            //Debug.Log(ButtonScr.counterVector[5]);
+            //Debug.Log("Angle 6");
+            //Debug.Log(ButtonScr.counterVector[6]);
+        }
+    }
 
     public void ChangeState()
     {
         switch (n)
         {
             case 0:
-                ButtonAxis.image.color = color1;
-                //animator.SetTrigger("FirstSelect");
-                Debug.Log("Activando color rojo y animaci�n FirstSelect");
+                panelState = true;
+                panel.SetActive(panelState);
+                ButtonAxis.image.color = color3;
+                textTitleMatrix.text = "Matriz de transformación del efector final";
+                ActualizaMatriz(0);
                 break;
             case 1:
                 ButtonAxis.image.color = color2;
-                //animator.SetTrigger("SecondSelect");
-                Debug.Log("Activando color verde y animaci�n SecondSelect");
-
-
-                float a1_val = 71.63f;
-                float d1_val = 29.6f;
-                float T1 = 0.5f;
-                float off = 0.1f;
-
-                Matrix4x4 H1 = DenavitMatrix(a1_val, T1 + off, d1_val, Mathf.PI / 2);
- 
-
-                panel.SetActive(true);
-                LogMatrix(H1);
-                UpdateMatrixDisplay(H1);
+                textTitleMatrix.text = "Matriz de transformación del eje seleccionado";
+                ActualizaMatriz((int)sliderVerificator.value);
                 break;
             case 2:
-                ButtonAxis.image.color = color3;
-                animator.SetTrigger("Reset");
-                Debug.Log("Activando color azul y animaci�n Reset");
-                panel.SetActive(false);
-                n = -1;
+                panelState = false;
+                panel.SetActive(panelState);
+                ButtonAxis.image.color = color1;
+                n = -1; // Reset para que en el siguiente click vuelva a 0
                 break;
         }
         n++;
-        Debug.Log($"Estado actual: {n}");   
+        Debug.Log($"Estado actual: {n}");
     }
 
     private Matrix4x4 DenavitMatrix(float a_i, float theta, float d_i, float alpha)
@@ -205,4 +224,65 @@ public class ButtonMatrix : MonoBehaviour
             }
         }
     }
+
+    public void ActualizaMatriz(int matrixSelector)
+    {
+        float a1_val = 71.63f;  // Longitud del eslabón 1 (mm)
+        float d1_val = 29.6f;   // Desplazamiento articular 1 (mm)
+        float d2_val = 8f;      // Desplazamiento articular 2 (mm)
+        float a2_val = 105.68f; // Longitud del eslabón 2 (mm)
+        float a3_val = 7.86f;   // Longitud del eslabón 3 (mm)
+        float d3_val = 18.5f;   // Desplazamiento articular 3 (mm)
+        float l1_val = 190.31f; // Longitud adicional (si es necesaria)
+        float l2_val = 95.57f;  // Longitud adicional (si es necesaria)
+        float T1 = ButtonScr.counterVector[1] * Mathf.Deg2Rad; ;
+        float T2 = ButtonScr.counterVector[2] * Mathf.Deg2Rad; ;
+        float T3 = ButtonScr.counterVector[3] * Mathf.Deg2Rad; ;
+        float T4 = ButtonScr.counterVector[4] * Mathf.Deg2Rad; ;
+        float T5 = ButtonScr.counterVector[5] * Mathf.Deg2Rad; ;
+        float T6 = ButtonScr.counterVector[6] * Mathf.Deg2Rad; ;
+
+        float off = 0f;
+
+        // Calculate transformation matrices
+        Matrix4x4 H1 = DenavitMatrix(a1_val, T1 + off, d1_val, Mathf.PI / 2);
+        Matrix4x4 H2 = DenavitMatrix(a2_val, T2 + Mathf.PI / 2 + off, d2_val, 0);
+        Matrix4x4 H3 = DenavitMatrix(a3_val, T3 + off, d3_val, -Mathf.PI / 2);
+        Matrix4x4 H4 = DenavitMatrix(0, T4 + off, l1_val, -Mathf.PI / 2);
+        Matrix4x4 H5 = DenavitMatrix(0, T5 + off, 0, Mathf.PI / 2);
+        Matrix4x4 H6 = DenavitMatrix(0, T6 + off, l2_val, 0);
+        Matrix4x4 finalMatrix = H1 * H2 * H3 * H4 * H5 * H6;
+        
+
+
+        switch (matrixSelector)
+        {
+            case 0:
+                UpdateMatrixDisplay(finalMatrix);
+                LogMatrix(finalMatrix);
+                break;
+            case 1:
+                UpdateMatrixDisplay(H1);
+                break;
+            case 2:
+                UpdateMatrixDisplay(H2);
+                break;
+            case 3:
+                UpdateMatrixDisplay(H3);
+                break;
+            case 4:
+                UpdateMatrixDisplay(H4);
+                break;
+            case 5:
+                UpdateMatrixDisplay(H5);
+                break;
+            case 6:
+                UpdateMatrixDisplay(H6);
+                break;
+
+
+        }
+
+    }
 }
+

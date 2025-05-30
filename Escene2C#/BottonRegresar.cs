@@ -57,6 +57,16 @@ public class BottonRegresar : MonoBehaviour
                 Debug.LogWarning("No hay más escenas disponibles. Volviendo a la escena 0.");
                 SceneManager.LoadScene(0);
             }
+            if (isConnected)
+            {
+                Disconnect();
+            }
+            else
+            {
+                Debug.LogWarning("No se pudo desconectar");
+
+            }
+
         }
         else
         {
@@ -147,6 +157,7 @@ public class BottonRegresar : MonoBehaviour
     {
         Debug.Log("Hola");
         SendMessageToESP32("Hola, estoy mandando algo");
+        SendMessageToESP32("hola");
     }
 
     void OnApplicationQuit()

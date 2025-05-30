@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class SliderValueHandler : MonoBehaviour
 {
     public Slider slider;
-    [SerializeField] private TextMeshProUGUI sliderText = null;
+    //[SerializeField] private TextMeshProUGUI sliderText = null;
     //[SerializeField] private UIRangeSlider MaxValueHandle = null; // Referencia al Slider
     //[SerializeField] private int maxSliderAmount = 6;
 

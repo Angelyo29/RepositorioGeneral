@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class CodePruebaSlider : MonoBehaviour
 {
-    public Slider slider;
+    public static Slider slider;
     public TextMeshProUGUI sliderText = null;
     public GameObject[] objects; // Arreglo de objetos J1, J2, etc.
 

@@ -4,9 +4,15 @@ import time
 # Constantes
 NUM_SERVOS = 7
 PWM_FREQ_HZ = 50
-
+pin1=4
+pin2=5
+pin3=6
+pin4=7
+pin5=15
+pin6=17
+pin7=8
 # Configuración de pines para los servomotores
-servo_pins = [10, 11, 12, 13, 14, 15, 16]
+servo_pins = [pin1, pin2, pin3, pin4, pin5, pin6, pin7]
 servos = []
 
 def init_servos():
@@ -89,7 +95,7 @@ def main():
             move_servo(6, 180) # Servo 6 a 180°
             time.sleep(2)
             
-            move_servo(7, 90)  # Servo 7 a 90°
+            move_servo(7, 0)  # Servo 7 a 90°
             time.sleep(2)
             
             # Volver a posición inicial

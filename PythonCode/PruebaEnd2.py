@@ -1,8 +1,9 @@
-from machine import Timer, Pin, PWM
+from machine import Pin, Timer
 import network
 import socket
 import time
 import uerrno
+from neopixel import NeoPixel
 
 class ESP32Server:
     def __init__(self, ap_name="MiESP32", ap_password="angel123angel", port=8000, max_connections=1, timeout=60):
@@ -18,26 +19,15 @@ class ESP32Server:
         self.led = Pin(2, Pin.OUT)  # LED integrado para indicar estado
         self.last_activity = time.time()
         
-        # Configuración de pines para LED RGB (ajusta según tu ESP32-S3)
-        # Estos son ejemplos - verifica los pines correctos para tu placa
-        self.led_red = PWM(Pin(41))   # Pin para LED Rojo
-        self.led_green = PWM(Pin(40)) # Pin para LED Verde
-        self.led_blue = PWM(Pin(39))  # Pin para LED Azul
-        
-        # Configurar frecuencia PWM
-        self.led_red.freq(1000)
-        self.led_green.freq(1000)
-        self.led_blue.freq(1000)
-        
-        # Apagar todos los LEDs al inicio
-        self.set_rgb_color(0, 0, 0)
+        # Configuración del LED RGB
+        self.neo_pin = Pin(48, Pin.OUT)
+        self.np = NeoPixel(self.neo_pin, 1)
+        self.set_rgb_led(0, 0, 0)  # Inicialmente apagado
 
-    def set_rgb_color(self, red, green, blue):
-        """Establece el color del LED RGB (valores de 0 a 255)"""
-        # Convertir de 0-255 a 0-65535 (rango PWM)
-        self.led_red.duty_u16(int(red * 257))
-        self.led_green.duty_u16(int(green * 257))
-        self.led_blue.duty_u16(int(blue * 257))
+    def set_rgb_led(self, r, g, b):
+        """Controla el LED RGB"""
+        self.np[0] = (r, g, b)
+        self.np.write()
 
     def setup_ap(self):
         """Configura el Access Point"""
@@ -78,19 +68,8 @@ class ESP32Server:
                         print("Cliente cerró la conexión")
                         break
                         
-                    message = data.decode().strip().lower()  # Convertir a minúsculas
+                    message = data.decode().strip().lower()  # Convertir a minúsculas para comparación
                     print(f"Mensaje recibido: {message}")
-                    
-                    # Procesar el mensaje y controlar LED RGB
-                    if message == "hola":
-                        print("Mostrando color azul")
-                        self.set_rgb_color(0, 0, 255)  # Azul
-                    elif message == "adios":
-                        print("Mostrando color rojo")
-                        self.set_rgb_color(255, 0, 0)    # Rojo
-                    else:
-                        print("Mensaje diferente recibido")
-                        self.set_rgb_color(0, 255, 0)    # Verde para otros mensajes
                     
                     # Enviar respuesta de confirmación
                     try:
@@ -99,12 +78,34 @@ class ESP32Server:
                         print(f"Error al enviar confirmación: {e}")
                         continue
                     
+                    # Procesar el mensaje para controlar el LED RGB
+                    if message == "hola":
+                        print("Mostrando LED azul")
+                        self.set_rgb_led(0, 0, 255)  # Azul
+                        time.sleep(0.1)
+                        self.set_rgb_led(0, 0, 0)  # Verde para mensajes desconocidos
+                    elif message == "adios":
+                        print("Mostrando LED rojo")
+                        self.set_rgb_led(255, 0, 0)  # Rojo
+                    elif message.startswith("led:"):
+                        led_command = message.split(":", 1)[1].lower()
+                        if led_command == "on":
+                            print("Encendiendo LED integrado")
+                            self.led.on()
+                        elif led_command == "off":
+                            print("Apagando LED integrado")
+                            self.led.off()
+                    else:
+                        print("Mensaje no reconocido")
+                        self.set_rgb_led(0, 255, 0)  # Verde para mensajes desconocidos
+                        time.sleep(0.1)
+                        self.set_rgb_led(0, 0, 0)  # Verde para mensajes desconocidos
+                    
                 except OSError as e:
                     if e.args[0] == uerrno.ETIMEDOUT:
                         continue  # Timeout, seguir esperando
                     elif e.args[0] == uerrno.ECONNRESET:
                         print("Conexión reiniciada por el cliente (ECONNRESET)")
-                        print("Esperando reconexión...")
                         break
                     else:
                         print(f"Error en la conexión: {e}")
@@ -128,7 +129,7 @@ class ESP32Server:
             self.client_conn = None
             self.client_addr = None
             self.led.off()  # LED apagado cuando no hay conexión
-            self.set_rgb_color(0, 0, 0)  # Apagar LED RGB
+            self.set_rgb_led(0, 0, 0)  # Apagar LED RGB
             print("Conexión con cliente cerrada")
 
     def close_server(self):

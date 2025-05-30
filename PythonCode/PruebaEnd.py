@@ -16,8 +16,7 @@ class ESP32Server:
         self.client_conn = None
         self.client_addr = None
         self.led = Pin(2, Pin.OUT)  # LED integrado para indicar estado
-        self.last_activity = tim
-        e.time()
+        self.last_activity = time.time()  # Corregido aquí
 
     def setup_ap(self):
         """Configura el Access Point"""
@@ -158,4 +157,3 @@ if __name__ == "__main__":
     )
     
     server.run()
-#Mod

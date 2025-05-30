@@ -22,7 +22,7 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     public Slider sliderVerificator;
 
 
-    public int[] counterVector = new int[] { 0, 0, 0, 0, 0,0,0 };
+    public static int[] counterVector = new int[] { 0, 0, 0, 0, 0,0,0 };
     private bool isIncreasePressed = false;
     private bool isDecreasePressed = false;
     //private bool isOpen = false;
@@ -34,7 +34,7 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
         // Asignar eventos a los botones
 
-        // Configurar detección de presión continua
+        // Configurar detecciï¿½n de presiï¿½n continua
         AddButtonHoldDetection(increaseButton.gameObject, true);
         AddButtonHoldDetection(decreaseButton.gameObject, false);
 
@@ -45,7 +45,7 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         ResetRotations();
     }
 
-    // Método para restablecer rotaciones a valores iniciales
+    // Mï¿½todo para restablecer rotaciones a valores iniciales
     private void ResetRotations()
     {
         // Establecer rotaciones iniciales para cada joint si es necesario
@@ -135,7 +135,7 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
                 break;
 
             default:
-                Debug.LogWarning("Articulación fuera de rango (1-6)");
+                Debug.LogWarning("Articulaciï¿½n fuera de rango (1-6)");
                 break;
         }
         return angleRotationLocal;
@@ -206,12 +206,12 @@ public class ButtonScr : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
 
 
-    // Implementación de interfaces
+    // Implementaciï¿½n de interfaces
     public void OnPointerDown(PointerEventData eventData) { }
     public void OnPointerUp(PointerEventData eventData) { }
 }
 
-// Clase auxiliar para manejar cada botón
+// Clase auxiliar para manejar cada botï¿½n
 public class ButtonHoldHandler : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     private ButtonScr mainScript;
